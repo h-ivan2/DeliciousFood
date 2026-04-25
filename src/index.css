@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #F5B301;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  /* Glass cards */
+  .glass-dark {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+  }
+
+  .glass-light {
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.07);
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #F5B301, #ff8c00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Glow effect */
+  .glow-accent {
+    box-shadow: 0 0 40px rgba(245, 179, 1, 0.2);
+  }
+
+  /* Input base */
+  .input-base {
+    @apply w-full rounded-xl outline-none transition-all duration-200 text-sm font-body;
+    padding: 13px 16px 13px 44px;
+  }
+
+  .input-dark {
+    @apply input-base;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+  .input-dark::placeholder { color: rgba(255,255,255,0.35); }
+  .input-dark:focus {
+    border-color: #F5B301;
+    background: rgba(245, 179, 1, 0.05);
+  }
+
+  .input-light {
+    @apply input-base;
+    background: #fff;
+    border: 1.5px solid #e2e2e2;
+    color: #1a1a1a;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .input-light::placeholder { color: #aaa; }
+  .input-light:focus { border-color: #F5B301; }
+
+  /* Card hover */
+  .card-hover {
+    @apply transition-all duration-300 cursor-pointer;
+  }
+  .card-hover:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Nav link */
+  .nav-link {
+    @apply font-medium text-sm transition-colors duration-200 cursor-pointer no-underline;
+  }
+  .nav-link:hover { color: #F5B301; }
+
+  /* Divider */
+  .auth-divider {
+    @apply flex items-center gap-3 text-xs;
+  }
+  .auth-divider::before,
+  .auth-divider::after {
+    content: '';
+    @apply flex-1 h-px;
+  }
+
+  /* Social button */
+  .social-btn-base {
+    @apply flex-1 flex items-center justify-center gap-2 rounded-xl py-3 font-medium text-sm transition-all duration-200 cursor-pointer font-body;
+    border: 1.5px solid;
+  }
+}
