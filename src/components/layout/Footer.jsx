@@ -1,10 +1,18 @@
 import { useTheme } from '../../context/ThemeContext';
 import { Logo } from '../ui';
+import {Twitter , Instagram , Linkedin , Facebook } from 'lucide-react';
 
 const FOOTER_COLS = [
   { title: 'Platform', links: ['Features', 'Restaurants', 'Pricing', 'About'] },
   { title: 'Company', links: ['Blog', 'Careers', 'Press', 'Contact'] },
   { title: 'Legal', links: ['Privacy', 'Terms', 'Cookie Policy', 'Licenses'] },
+];
+
+const SOCIAL =[
+  {icon: <Twitter size={16}/>, label: 'Twitter' },
+  {icon: <Instagram size={16}/>, label: 'Instagram'},
+  {icon: <Linkedin size={16}/>, label: 'LinkedIn'},
+  {icon: <Facebook size={16}/> , label: 'Facebook'},
 ];
 
 export default function Footer() {
@@ -19,14 +27,17 @@ export default function Footer() {
             <p className={`text-sm mt-4 leading-relaxed max-w-[240px] ${dark ? 'text-white/45' : 'text-gray-500'}`}>
               Powering restaurants with cutting-edge management tools and connecting customers to great food.
             </p>
-            <div className="flex gap-3 mt-5">
-              {['🐦', '📸', '💼', '📘'].map((icon, i) => (
-                <button key={i} className={`w-9 h-9 rounded-lg flex items-center justify-center text-base cursor-pointer border-none transition-all duration-200 hover:bg-accent/20 ${dark ? 'bg-white/5' : 'bg-gray-100'}`}>
+            <div className='flex gap-3 mt-5'>
+              {SOCIAL.map(({ icon, label})=>{
+                <button 
+                key={label}
+                aria-label={label}
+                className={`w-9 h-9 rounded-lg flex items-center justify-center text-base cursor-pointer border-none transition-all duration-200 hover:bg-accent/20 ${dark ? 'bg-white/5' : 'bg-gray-100'}`}>
                   {icon}
                 </button>
-              ))}
+              })}
             </div>
-          </div>
+            </div>
 
           {FOOTER_COLS.map((col) => (
             <div key={col.title}>
