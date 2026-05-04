@@ -67,6 +67,14 @@ exports.createItem = async (req, res, next) => {
     if (category.restaurant.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Not authorised' });
     }
+
+    if (req.file) {
+      req.body.image = {
+        public_id: req.file.filename,
+        url: req.file.path
+      };
+    }
+
     req.body.restaurant = category.restaurant._id;
     const item = await MenuItem.create(req.body);
     res.status(201).json({ success: true, data: item });
@@ -98,6 +106,14 @@ exports.updateItem = async (req, res, next) => {
     if (item.restaurant.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Not authorised' });
     }
+
+    if (req.file) {
+      req.body.image = {
+        public_id: req.file.filename,
+        url: req.file.path
+      };
+    }
+
     const updated = await MenuItem.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     res.status(200).json({ success: true, data: updated });
   } catch (err) { next(err); }
