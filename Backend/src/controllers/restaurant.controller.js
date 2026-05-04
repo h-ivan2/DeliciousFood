@@ -50,6 +50,21 @@ exports.getRestaurant = async (req, res, next) => {
 // @access  Private (owner)
 exports.createRestaurant = async (req, res, next) => {
   try {
+    if (req.files) {
+      if (req.files.logo) {
+        req.body.logo = {
+          public_id: req.files.logo[0].filename,
+          url: req.files.logo[0].path
+        };
+      }
+      if (req.files.coverImage) {
+        req.body.coverImage = {
+          public_id: req.files.coverImage[0].filename,
+          url: req.files.coverImage[0].path
+        };
+      }
+    }
+
     const restaurant = await Restaurant.create({ ...req.body, owner: req.user._id });
     res.status(201).json({ success: true, data: restaurant });
   } catch (err) {
@@ -73,6 +88,21 @@ exports.updateRestaurant = async (req, res, next) => {
 
     // Owners cannot change their own status — only admins can
     if (req.user.role !== 'admin') delete req.body.status;
+
+    if (req.files) {
+      if (req.files.logo) {
+        req.body.logo = {
+          public_id: req.files.logo[0].filename,
+          url: req.files.logo[0].path
+        };
+      }
+      if (req.files.coverImage) {
+        req.body.coverImage = {
+          public_id: req.files.coverImage[0].filename,
+          url: req.files.coverImage[0].path
+        };
+      }
+    }
 
     const updated = await Restaurant.findByIdAndUpdate(req.params.id, req.body, {
       new:             true,
