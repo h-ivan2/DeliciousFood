@@ -3,6 +3,7 @@ const express    = require('express');
 const router     = express.Router();
 const ctrl       = require('../controllers/restaurant.controller');
 const { protect, authorize } = require('../middleware/auth');
+const upload     = require('../middleware/upload');
 
 /**
  * @swagger
@@ -67,7 +68,7 @@ router.get('/', ctrl.getRestaurants);
  *       401:
  *         description: Not logged in
  */
-router.post('/', protect, authorize('owner'), ctrl.createRestaurant);
+router.post('/', protect, authorize('owner'), upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'coverImage', maxCount: 1 }]), ctrl.createRestaurant);
 
 /**
  * @swagger
@@ -88,7 +89,7 @@ router.post('/', protect, authorize('owner'), ctrl.createRestaurant);
  */
 router.get('/:id', ctrl.getRestaurant);
 router.get('/my',        protect, authorize('owner'), ctrl.getMyRestaurants);
-router.put('/:id',       protect, authorize('owner', 'admin'), ctrl.updateRestaurant);
+router.put('/:id',       protect, authorize('owner', 'admin'), upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'coverImage', maxCount: 1 }]), ctrl.updateRestaurant);
 router.delete('/:id',    protect, authorize('owner', 'admin'), ctrl.deleteRestaurant);
 router.patch('/:id/toggle', protect, authorize('owner'), ctrl.toggleOpen);
 
