@@ -50,6 +50,11 @@ exports.placeOrder = async (req, res, next) => {
       totalAmount,
     });
 
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`restaurant_${restaurantId}`).emit('new_order', order);
+    }
+
     res.status(201).json({ success: true, data: order });
   } catch (err) {
     next(err);
@@ -112,6 +117,15 @@ exports.updateStatus = async (req, res, next) => {
     order.status = status;
     await order.save({ validateBeforeSave: false });
 
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`user_${order.customer}`).emit('order_status_update', {
+        orderId: order._id,
+        status: order.status,
+        orderNumber: order.orderNumber
+      });
+    }
+
     res.status(200).json({ success: true, data: order });
   } catch (err) { next(err); }
 };
@@ -136,6 +150,15 @@ exports.cancelOrder = async (req, res, next) => {
     order.status       = 'cancelled';
     order.cancelReason = req.body.reason;
     await order.save({ validateBeforeSave: false });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`restaurant_${order.restaurant}`).emit('order_cancelled', {
+        orderId: order._id,
+        orderNumber: order.orderNumber,
+        reason: order.cancelReason
+      });
+    }
 
     res.status(200).json({ success: true, message: 'Order cancelled' });
   } catch (err) { next(err); }
