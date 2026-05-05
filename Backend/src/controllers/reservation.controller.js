@@ -1,12 +1,55 @@
 const Reservation = require('../models/reservation.model');
 const Restaurant  = require('../models/restaurant.model');
+const Table       = require('../models/table.model');
 
 exports.createReservation = async (req, res, next) => {
   try {
-    const restaurant = await Restaurant.findById(req.body.restaurant);
+    const { restaurant: restaurantId, table: tableId, date, time, partySize } = req.body;
+
+    const restaurant = await Restaurant.findById(restaurantId);
     if (!restaurant || restaurant.status !== 'approved') {
       return res.status(404).json({ success: false, message: 'Restaurant not found' });
     }
+
+    const table = await Table.findById(tableId);
+    if (!table || table.restaurant.toString() !== restaurantId.toString() || !table.isActive) {
+      return res.status(400).json({ success: false, message: 'Invalid or inactive table selected' });
+    }
+
+    if (table.capacity < partySize) {
+      return res.status(400).json({ success: false, message: 'Table capacity is smaller than party size' });
+    }
+
+    // Check for overlapping reservations (2-hour window)
+    const requestedDateTime = new Date(`${date}T${time}`);
+    const twoHoursBefore = new Date(requestedDateTime.getTime() - 2 * 60 * 60 * 1000);
+    const twoHoursAfter = new Date(requestedDateTime.getTime() + 2 * 60 * 60 * 1000);
+
+    const overlappingReservation = await Reservation.findOne({
+      table: tableId,
+      status: { $in: ['pending', 'confirmed'] },
+      $expr: {
+        $and: [
+          {
+            $gt: [
+              { $dateFromString: { dateString: { $concat: [ { $dateToString: { format: "%Y-%m-%d", date: "$date" } }, "T", "$time" ] } } },
+              twoHoursBefore
+            ]
+          },
+          {
+            $lt: [
+              { $dateFromString: { dateString: { $concat: [ { $dateToString: { format: "%Y-%m-%d", date: "$date" } }, "T", "$time" ] } } },
+              twoHoursAfter
+            ]
+          }
+        ]
+      }
+    });
+
+    if (overlappingReservation) {
+      return res.status(400).json({ success: false, message: 'Table is already booked during this time window' });
+    }
+
     const reservation = await Reservation.create({ ...req.body, customer: req.user._id });
     res.status(201).json({ success: true, data: reservation });
   } catch (err) { next(err); }
