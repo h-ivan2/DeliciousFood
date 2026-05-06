@@ -1,4 +1,6 @@
 const express      = require('express');
+const http         = require('http');
+const { Server }   = require('socket.io');
 const dotenv       = require('dotenv');
 const cors         = require('cors');
 const helmet       = require('helmet');
@@ -34,6 +36,7 @@ const reviewRoutes = require('./routes/review.routes');
 const reservationRoutes= require('./routes/reservation.routes');
 const notificationRoutes= require('./routes/notification.routes');
 const adminRoutes = require('./routes/admin.routes');
+const tableRoutes = require('./routes/table.routes');
 
 
 app.use('/api/v1/auth',        authRoutes);
@@ -45,6 +48,7 @@ app.use('/api/v1/reviews',reviewRoutes);
 app.use('/api/v1/reservations' , reservationRoutes); 
 app.use('/api/v1/notifications', notificationRoutes );
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/tables', tableRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ success: true, message: 'Server is running' });
@@ -57,7 +61,36 @@ app.all('/{*splat}', (req, res) => {
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
+
+// Create HTTP server instead of using app.listen directly
+const server = http.createServer(app);
+
+// Initialize Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    credentials: true,
+  },
+});
+
+// Make io accessible in controllers
+app.set('io', io);
+
+io.on('connection', (socket) => {
+  console.log(`🔌 New client connected: ${socket.id}`);
+
+  // Join a specific room (e.g., 'user_123', 'restaurant_456')
+  socket.on('join_room', (roomId) => {
+    socket.join(roomId);
+    console.log(`Socket ${socket.id} joined room ${roomId}`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`🔌 Client disconnected: ${socket.id}`);
+  });
+});
+
+server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
   console.log(`📚 Swagger docs at http://localhost:${PORT}/api-docs`);
 });
