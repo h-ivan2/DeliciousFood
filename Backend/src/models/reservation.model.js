@@ -11,6 +11,11 @@ const reservationSchema = new mongoose.Schema({
     ref:      'Restaurant',
     required: true,
   },
+  table: {
+    type:     mongoose.Schema.Types.ObjectId,
+    ref:      'Table',
+    required: true,
+  },
   date:      { type: Date,   required: true },
   time:      { type: String, required: true },
   partySize: { type: Number, required: true, min: 1 },
