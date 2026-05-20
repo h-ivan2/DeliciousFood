@@ -15,7 +15,7 @@ exports.getRestaurants = async (req, res, next) => {
 
     const [restaurants, total] = await Promise.all([
       Restaurant.find(filter).skip(skip).limit(Number(limit)).sort('-rating'),
-      Restaurant.countDocuments(filter),
+      Restaurant.countDocuments(filter) ,
     ]);
 
     res.status(200).json({
