@@ -21,7 +21,7 @@ exports.getRestaurantReviews = async (req, res, next) => {
       .sort('-createdAt');
     res.status(200).json({ success: true, count: reviews.length, data: reviews });
   } catch (err) { next(err); }
-};
+} ;
 
 exports.replyToReview = async (req, res, next) => {
   try {
