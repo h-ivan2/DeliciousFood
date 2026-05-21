@@ -79,7 +79,7 @@ exports.getMyOrders = async (req, res, next) => {
 exports.getOrder = async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id)
-      .populate('restaurant', 'name logo address phone')
+      .populate('restaurant', 'name logo address phone owner')
       .populate('customer',   'name email phone');
 
     if (!order) {
@@ -87,9 +87,10 @@ exports.getOrder = async (req, res, next) => {
     }
 
     const isCustomer = order.customer._id.toString() === req.user._id.toString();
+    const isOwner    = order.restaurant.owner && order.restaurant.owner.toString() === req.user._id.toString();
     const isAdmin    = req.user.role === 'admin';
 
-    if (!isCustomer && !isAdmin) {
+    if (!isCustomer && !isOwner && !isAdmin) {
       return res.status(403).json({ success: false, message: 'Not authorised' });
     }
 
