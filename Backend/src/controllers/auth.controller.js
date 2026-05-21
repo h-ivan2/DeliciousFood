@@ -33,11 +33,12 @@ exports.register = async (req, res, next) => {
       });
     }
 
-    const existing = await User.findOne({ email});
-    if(existing) {
-        return re.status(400).json({
-            sucess: false , message: 'Email already registered'
-        });
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email already registered',
+      });
     }
     
 
@@ -95,28 +96,30 @@ exports.getMe = async (req, res, next) => {
 
 // Forgot password
 
-exports.forgotPassword = async (req,res,next) =>{
-    try{
-        const user = await User.findOne({ email: req.body.email});
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
 
-        if(!user) {
-            return res.status(200).json({
-                success: true, message: 'if that email exists, a reset link was sent'
-            });
+    if (!user) {
+      // Return 200 even if email doesn't exist to prevent email enumeration/discovery
+      return res.status(200).json({
+        success: true,
+        message: 'If that email exists, a reset link was sent',
+      });
+    }
 
-            const resetToken = user.getPasswordToken();
-            await user.save({ validateBeforeSave: false});
+    const resetToken = user.getResetPasswordToken();
+    await user.save({ validateBeforeSave: false });
 
-            const resetUrl= `${re.protocol}:://${req.get('host')}/api/v1/auth/reset-password/${resetToken}`;
-            re.status(200).json({
-                success: true, 
-                message:'Reset token generated',
-                resetUrl
-            });
-        } 
-    }catch(err){
-            next(err);
-        }
+    const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/reset-password/${resetToken}`;
+    res.status(200).json({
+      success: true,
+      message: 'Reset token generated',
+      resetUrl,
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
 exports.resetPassword = async (req, res, next) => {
