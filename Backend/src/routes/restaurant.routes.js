@@ -87,8 +87,8 @@ router.post('/', protect, authorize('owner'), upload.fields([{ name: 'logo', max
  *       404:
  *         description: Not found
  */
-router.get('/:id', ctrl.getRestaurant);
 router.get('/my',        protect, authorize('owner'), ctrl.getMyRestaurants);
+router.get('/:id', ctrl.getRestaurant);
 router.put('/:id',       protect, authorize('owner', 'admin'), upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'coverImage', maxCount: 1 }]), ctrl.updateRestaurant);
 router.delete('/:id',    protect, authorize('owner', 'admin'), ctrl.deleteRestaurant);
 router.patch('/:id/toggle', protect, authorize('owner'), ctrl.toggleOpen);
