@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { Logo, ThemeToggle, Icons } from '../components/ui';
 import { IMG_LOGIN_BG, IMG_LOGO } from '../constants/images';
+import { authService } from '../services/api';
 
 const QUOTES = [
   { text: 'Good food is the foundation of genuine happiness.', author: 'Auguste Escoffier' },
@@ -19,6 +20,8 @@ export default function Login() {
   const [showPass, setShowPass] = useState(false);
   const [remember, setRemember] = useState(true);
   const [quoteIdx, setQuoteIdx] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const bg = dark ? '#070B14' : '#f8f5f0';
   const cardBg = dark ? '#0B1020' : '#ffffff';
@@ -54,11 +57,27 @@ export default function Login() {
         </div>
 
         {/* Heading */}
-        <div className="mb-8">
+        <div className="mb-6 flex flex-col items-start">
           <h1 className="font-display font-black text-3xl mb-1.5">
             Welcome back 👋
           </h1>
-          <p style={{ color: subColor, fontSize: 15 }}>Sign in to continue to your account</p>
+          <p className="mb-4" style={{ color: subColor, fontSize: 15 }}>Sign in to continue to your account</p>
+          
+          <button
+            onClick={() => {
+              setEmail('admin@delicious.com');
+              setPassword('admin123');
+              setErrorMsg('');
+            }}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1.5 border border-dashed hover:bg-opacity-20 cursor-pointer transition-all duration-200"
+            style={{
+              borderColor: '#F5B301',
+              background: 'rgba(245,179,1,0.08)',
+              color: '#F5B301',
+            }}
+          >
+            ⚡ Quick Login: Super Admin
+          </button>
         </div>
 
         {/* Form fields */}
@@ -150,18 +169,49 @@ export default function Login() {
             </button>
           </div>
 
+          {/* Error Message */}
+          {errorMsg && (
+            <p className="text-xs text-red-500 font-semibold mt-1">
+              ⚠️ {errorMsg}
+            </p>
+          )}
+
           {/* Sign In button */}
           <motion.button
-            whileHover={{ y: -2, boxShadow: '0 8px 28px rgba(245,179,1,0.4)' }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full rounded-full font-bold text-base flex items-center justify-center gap-2 border-none cursor-pointer transition-all duration-200"
+            whileHover={!loading ? { y: -2, boxShadow: '0 8px 28px rgba(245,179,1,0.4)' } : {}}
+            whileTap={!loading ? { scale: 0.98 } : {}}
+            className={`w-full rounded-full font-bold text-base flex items-center justify-center gap-2 border-none cursor-pointer transition-all duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             style={{ background: '#F5B301', color: '#000', padding: '15px', fontFamily: 'DM Sans, sans-serif' }}
-            onClick={() => {}}
+            onClick={async () => {
+              if (loading) return;
+              setErrorMsg('');
+              if (!email || !password) {
+                setErrorMsg('Please fill in both email and password');
+                return;
+              }
+              setLoading(true);
+              try {
+                const res = await authService.login(email, password);
+                if (res.success) {
+                  if (res.user.role === 'admin') {
+                    navigate('/admin');
+                  } else {
+                    setErrorMsg('Access denied. Currently only Super Admin dashboard is built!');
+                  }
+                }
+              } catch (err) {
+                setErrorMsg(err.message);
+              } finally {
+                setLoading(false);
+              }
+            }}
           >
-            Sign In
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-            </svg>
+            {loading ? 'Signing In...' : 'Sign In'}
+            {!loading && (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+              </svg>
+            )}
           </motion.button>
         </div>
 
